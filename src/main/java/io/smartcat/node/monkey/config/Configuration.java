@@ -14,11 +14,6 @@ public class Configuration {
     }
 
     /**
-     * Specifies the percentage of requests to be delayed.
-     */
-    public Integer delayedRequestPercentage = 100;
-
-    /**
      * Specifies the request latency in milliseconds.
      */
     public Integer requestLatency = 30;
