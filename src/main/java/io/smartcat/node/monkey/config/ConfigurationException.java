@@ -48,7 +48,7 @@ public final class ConfigurationException extends Exception {
      * @param writableStackTrace stack trace
      */
     public ConfigurationException(String message, Throwable cause, boolean enableSuppression,
-                                  boolean writableStackTrace) {
+            boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

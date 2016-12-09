@@ -23,8 +23,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * LatencyMonkey adds "chaos" to the configurable amount of queries either by
- * adding latencies, or failing requests completely.
+ * LatencyMonkey adds latency to the queries, or fails them completely. The
+ * amount of affected queries is set through external configuration.
  */
 public final class LatencyMonkey implements QueryHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(LatencyMonkey.class);
@@ -92,47 +92,40 @@ public final class LatencyMonkey implements QueryHandler {
         }
     }
 
-    @Override
-    public ResultMessage process(String s, QueryState queryState, QueryOptions queryOptions,
-                                 Map<String, ByteBuffer> map)
-            throws RequestExecutionException, RequestValidationException {
+    @Override public ResultMessage process(String s, QueryState queryState, QueryOptions queryOptions,
+            Map<String, ByteBuffer> map) throws RequestExecutionException, RequestValidationException {
         LOGGER.trace("Intercepted process");
         applyNext();
         return queryHandler.process(s, queryState, queryOptions, map);
     }
 
-    @Override
-    public ResultMessage.Prepared prepare(String s, QueryState queryState, Map<String, ByteBuffer> map)
+    @Override public ResultMessage.Prepared prepare(String s, QueryState queryState, Map<String, ByteBuffer> map)
             throws RequestValidationException {
         LOGGER.trace("Intercepted prepare");
         applyNext();
         return queryHandler.prepare(s, queryState, map);
     }
 
-    @Override
-    public ParsedStatement.Prepared getPrepared(MD5Digest md5Digest) {
+    @Override public ParsedStatement.Prepared getPrepared(MD5Digest md5Digest) {
         LOGGER.trace("Intercepted getPrepared");
         return queryHandler.getPrepared(md5Digest);
     }
 
-    @Override
-    public ParsedStatement.Prepared getPreparedForThrift(Integer integer) {
+    @Override public ParsedStatement.Prepared getPreparedForThrift(Integer integer) {
         LOGGER.trace("Intercepted getPreparedForThrift");
         return queryHandler.getPreparedForThrift(integer);
     }
 
-    @Override
-    public ResultMessage processPrepared(CQLStatement cqlStatement, QueryState queryState, QueryOptions queryOptions,
-                                         Map<String, ByteBuffer> map)
+    @Override public ResultMessage processPrepared(CQLStatement cqlStatement, QueryState queryState,
+            QueryOptions queryOptions, Map<String, ByteBuffer> map)
             throws RequestExecutionException, RequestValidationException {
         LOGGER.trace("Intercepted processPrepared");
         applyNext();
         return queryHandler.processPrepared(cqlStatement, queryState, queryOptions, map);
     }
 
-    @Override
-    public ResultMessage processBatch(BatchStatement batchStatement, QueryState queryState,
-                                      BatchQueryOptions batchQueryOptions, Map<String, ByteBuffer> map)
+    @Override public ResultMessage processBatch(BatchStatement batchStatement, QueryState queryState,
+            BatchQueryOptions batchQueryOptions, Map<String, ByteBuffer> map)
             throws RequestExecutionException, RequestValidationException {
         LOGGER.trace("Intercepted processBatch");
         applyNext();
@@ -156,8 +149,7 @@ public final class LatencyMonkey implements QueryHandler {
             void apply() {
                 throw new InvalidRequestException("Aborted by node monkey.");
             }
-        },
-        DELAY {
+        }, DELAY {
             void apply() {
                 try {
                     Thread.sleep(config.requestLatency);
@@ -165,8 +157,7 @@ public final class LatencyMonkey implements QueryHandler {
                     LOGGER.warn("Interrupted sleep thread.", e);
                 }
             }
-        },
-        EXECUTE {
+        }, EXECUTE {
             void apply() {
 
             }
