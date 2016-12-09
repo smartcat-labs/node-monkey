@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -40,31 +39,42 @@ public final class LatencyMonkey implements QueryHandler {
      * Default constructor.
      */
     public LatencyMonkey() {
-        loadConfiguration();
-
         actions = new Action[TOTAL_ACTIONS];
         nextAction = new AtomicInteger();
 
+        loadConfiguration();
         distributeActions();
         shuffleActions();
 
-        LOGGER.trace("Started node monkey...");
+        LOGGER.info("Started node monkey...");
     }
 
     private void loadConfiguration() {
         ConfigurationLoader loader = new YamlConfigurationLoader();
+
         try {
             config = loader.load();
         } catch (ConfigurationException e) {
-            LOGGER.error("A problem occurred while loading configuration.", e);
-            throw new IllegalStateException(e);
+            LOGGER.warn("A problem occurred while loading configuration.", e);
+            config = Configuration.loadDefaults();
         }
     }
 
     private void distributeActions() {
-        Arrays.fill(actions, 0, config.delayedRequestsPercentage, Action.DELAY);
-        Arrays.fill(actions, config.delayedRequestsPercentage, config.failedRequestsPercentage, Action.ABORT);
-        Arrays.fill(actions, config.failedRequestsPercentage, actions.length, Action.EXECUTE);
+        int index = 0;
+
+        while (index < config.delayedRequestsPercentage) {
+            actions[index++] = Action.DELAY;
+        }
+
+        int chaosPercentage = config.delayedRequestsPercentage + config.failedRequestsPercentage;
+        while (index < chaosPercentage) {
+            actions[index++] = Action.ABORT;
+        }
+
+        while (index < actions.length) {
+            actions[index++] = Action.EXECUTE;
+        }
     }
 
     /*

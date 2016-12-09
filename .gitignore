@@ -1,3 +1,7 @@
+# build artifacts
+dependency-reduced-pom.xml
 target/
+
+# IntelliJ
 .idea/
 *.iml
