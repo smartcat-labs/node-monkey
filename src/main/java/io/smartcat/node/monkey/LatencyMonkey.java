@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public final class LatencyMonkey implements QueryHandler {
@@ -80,12 +82,13 @@ public final class LatencyMonkey implements QueryHandler {
      * Fisher-Yates array shuffling algorithm.
      */
     private void shuffleActions() {
-        int n = actions.length;
-        for (int i = 0; i < n; i++) {
-            int r = i + (int) (Math.random() * (n - i));
+        Random random = ThreadLocalRandom.current();
 
-            Action a = actions[r];
-            actions[r] = actions[i];
+        for (int i = 0; i < actions.length; i++) {
+            int j = random.nextInt(i + 1);
+
+            Action a = actions[j];
+            actions[j] = actions[i];
             actions[i] = a;
         }
     }
