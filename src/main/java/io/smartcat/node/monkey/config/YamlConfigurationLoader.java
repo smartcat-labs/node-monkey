@@ -11,6 +11,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
+/**
+ * YAML based implementation of {@link ConfigurationLoader}.
+ */
 public final class YamlConfigurationLoader implements ConfigurationLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(YamlConfigurationLoader.class);
     private static final String CONFIGURATION_PROPERTY_NAME = "node.monkey.config";
@@ -53,10 +56,12 @@ public final class YamlConfigurationLoader implements ConfigurationLoader {
         return url;
     }
 
+    @Override
     public Configuration load() throws ConfigurationException {
         return load(configURL());
     }
 
+    @Override
     public Configuration load(URL url) throws ConfigurationException {
         try {
             LOGGER.info("Loading settings from {}", url);

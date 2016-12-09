@@ -42,13 +42,13 @@ public final class ConfigurationException extends Exception {
     /**
      * Constructor.
      *
-     * @param message
-     * @param cause
-     * @param enableSuppression
-     * @param writableStackTrace
+     * @param message            error message
+     * @param cause              underlying exception
+     * @param enableSuppression  controls exception suppression
+     * @param writableStackTrace stack trace
      */
     public ConfigurationException(String message, Throwable cause, boolean enableSuppression,
-            boolean writableStackTrace) {
+                                  boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }
