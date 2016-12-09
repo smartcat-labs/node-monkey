@@ -155,7 +155,8 @@ public final class LatencyMonkey implements QueryHandler {
             void apply() {
                 throw new InvalidRequestException("Aborted by node monkey.");
             }
-        }, DELAY {
+        },
+        DELAY {
             void apply() {
                 try {
                     Thread.sleep(config.requestLatency);
@@ -163,7 +164,8 @@ public final class LatencyMonkey implements QueryHandler {
                     LOGGER.warn("Interrupted sleep thread.", e);
                 }
             }
-        }, EXECUTE {
+        },
+        EXECUTE {
             void apply() {
 
             }

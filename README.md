@@ -27,6 +27,10 @@ delayedRequestsPercentage: 20
 requestLatency: 30
 ```
 
+> Note that any invalid property provided through the configuration file,
+e.g. negative latency, will cause the configuration to be replaced with
+the default one.
+
 Finally, to configure Cassandra to use the node monkey, append the following commands at the end of
 `cassandra-env.sh`:
 
