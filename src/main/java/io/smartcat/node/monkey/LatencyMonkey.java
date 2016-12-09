@@ -11,6 +11,7 @@ import org.apache.cassandra.cql3.QueryOptions;
 import org.apache.cassandra.cql3.QueryProcessor;
 import org.apache.cassandra.cql3.statements.BatchStatement;
 import org.apache.cassandra.cql3.statements.ParsedStatement;
+import org.apache.cassandra.exceptions.InvalidRequestException;
 import org.apache.cassandra.exceptions.RequestExecutionException;
 import org.apache.cassandra.exceptions.RequestValidationException;
 import org.apache.cassandra.service.QueryState;
@@ -34,7 +35,7 @@ public final class LatencyMonkey implements QueryHandler {
     private enum Action {
         ABORT {
             void apply() {
-                throw new RuntimeException("Aborted by node monkey.");
+                throw new InvalidRequestException("Aborted by node monkey.");
             }
         },
         DELAY {
