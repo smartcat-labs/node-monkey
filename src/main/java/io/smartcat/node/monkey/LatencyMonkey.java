@@ -28,12 +28,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public final class LatencyMonkey implements QueryHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(LatencyMonkey.class);
+    private static final int TOTAL_ACTIONS = 100;
     private static Configuration config;
 
     private enum Action {
         ABORT {
             void apply() {
-                throw new RuntimeException();
+                throw new RuntimeException("Aborted by node monkey.");
             }
         },
         DELAY {
@@ -50,16 +51,20 @@ public final class LatencyMonkey implements QueryHandler {
         void apply() {}
     }
 
-    private Action[] actions = new Action[100];
-    private AtomicInteger nextAction = new AtomicInteger();
-
-    private QueryHandler queryHandler = QueryProcessor.instance;
+    private final QueryHandler queryHandler = QueryProcessor.instance;
+    private final Action[] actions;
+    private final AtomicInteger nextAction;
 
     public LatencyMonkey() {
         loadConfiguration();
+
+        actions = new Action[TOTAL_ACTIONS];
+        nextAction = new AtomicInteger();
+
         distributeActions();
         shuffleActions();
-        LOGGER.info("Started node monkey...");
+
+        LOGGER.trace("Started node monkey...");
     }
 
     private void loadConfiguration() {
@@ -95,31 +100,31 @@ public final class LatencyMonkey implements QueryHandler {
 
     public ResultMessage process(String s, QueryState queryState, QueryOptions queryOptions,
             Map<String, ByteBuffer> map) throws RequestExecutionException, RequestValidationException {
-        LOGGER.info("Intercepted process");
+        LOGGER.trace("Intercepted process");
         applyNext();
         return queryHandler.process(s, queryState, queryOptions, map);
     }
 
     public ResultMessage.Prepared prepare(String s, QueryState queryState, Map<String, ByteBuffer> map)
             throws RequestValidationException {
-        LOGGER.info("Intercepted prepare");
+        LOGGER.trace("Intercepted prepare");
         applyNext();
         return queryHandler.prepare(s, queryState, map);
     }
 
     public ParsedStatement.Prepared getPrepared(MD5Digest md5Digest) {
-        LOGGER.info("Intercepted getPrepared");
+        LOGGER.trace("Intercepted getPrepared");
         return queryHandler.getPrepared(md5Digest);
     }
 
     public ParsedStatement.Prepared getPreparedForThrift(Integer integer) {
-        LOGGER.info("Intercepted getPreparedForThrift");
+        LOGGER.trace("Intercepted getPreparedForThrift");
         return queryHandler.getPreparedForThrift(integer);
     }
 
     public ResultMessage processPrepared(CQLStatement cqlStatement, QueryState queryState, QueryOptions queryOptions,
             Map<String, ByteBuffer> map) throws RequestExecutionException, RequestValidationException {
-        LOGGER.info("Intercepted processPrepared");
+        LOGGER.trace("Intercepted processPrepared");
         applyNext();
         return queryHandler.processPrepared(cqlStatement, queryState, queryOptions, map);
     }
@@ -127,7 +132,7 @@ public final class LatencyMonkey implements QueryHandler {
     public ResultMessage processBatch(BatchStatement batchStatement, QueryState queryState,
             BatchQueryOptions batchQueryOptions, Map<String, ByteBuffer> map)
             throws RequestExecutionException, RequestValidationException {
-        LOGGER.info("Intercepted processBatch");
+        LOGGER.trace("Intercepted processBatch");
         applyNext();
         return queryHandler.processBatch(batchStatement, queryState, batchQueryOptions, map);
     }
