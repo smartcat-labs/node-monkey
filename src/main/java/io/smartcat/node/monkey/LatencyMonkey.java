@@ -46,7 +46,7 @@ public final class LatencyMonkey implements QueryHandler {
         distributeActions();
         shuffleActions();
 
-        LOGGER.info("Started node monkey...");
+        LOGGER.info("Started node monkey with configuration {}", config);
     }
 
     private void loadConfiguration() {
@@ -92,31 +92,36 @@ public final class LatencyMonkey implements QueryHandler {
         }
     }
 
-    @Override public ResultMessage process(String s, QueryState queryState, QueryOptions queryOptions,
+    @Override
+    public ResultMessage process(String s, QueryState queryState, QueryOptions queryOptions,
             Map<String, ByteBuffer> map) throws RequestExecutionException, RequestValidationException {
         LOGGER.trace("Intercepted process");
         applyNext();
         return queryHandler.process(s, queryState, queryOptions, map);
     }
 
-    @Override public ResultMessage.Prepared prepare(String s, QueryState queryState, Map<String, ByteBuffer> map)
+    @Override
+    public ResultMessage.Prepared prepare(String s, QueryState queryState, Map<String, ByteBuffer> map)
             throws RequestValidationException {
         LOGGER.trace("Intercepted prepare");
         applyNext();
         return queryHandler.prepare(s, queryState, map);
     }
 
-    @Override public ParsedStatement.Prepared getPrepared(MD5Digest md5Digest) {
+    @Override
+    public ParsedStatement.Prepared getPrepared(MD5Digest md5Digest) {
         LOGGER.trace("Intercepted getPrepared");
         return queryHandler.getPrepared(md5Digest);
     }
 
-    @Override public ParsedStatement.Prepared getPreparedForThrift(Integer integer) {
+    @Override
+    public ParsedStatement.Prepared getPreparedForThrift(Integer integer) {
         LOGGER.trace("Intercepted getPreparedForThrift");
         return queryHandler.getPreparedForThrift(integer);
     }
 
-    @Override public ResultMessage processPrepared(CQLStatement cqlStatement, QueryState queryState,
+    @Override
+    public ResultMessage processPrepared(CQLStatement cqlStatement, QueryState queryState,
             QueryOptions queryOptions, Map<String, ByteBuffer> map)
             throws RequestExecutionException, RequestValidationException {
         LOGGER.trace("Intercepted processPrepared");
@@ -124,7 +129,8 @@ public final class LatencyMonkey implements QueryHandler {
         return queryHandler.processPrepared(cqlStatement, queryState, queryOptions, map);
     }
 
-    @Override public ResultMessage processBatch(BatchStatement batchStatement, QueryState queryState,
+    @Override
+    public ResultMessage processBatch(BatchStatement batchStatement, QueryState queryState,
             BatchQueryOptions batchQueryOptions, Map<String, ByteBuffer> map)
             throws RequestExecutionException, RequestValidationException {
         LOGGER.trace("Intercepted processBatch");

@@ -31,4 +31,21 @@ public class Configuration {
     public static Configuration loadDefaults() {
         return new Configuration();
     }
+
+    /**
+     * Determines whether or not a configuration is valid.
+     *
+     * @return true if configuration is valid, false otherwise
+     */
+    boolean isValid() {
+        return (failedRequestsPercentage > 0 && delayedRequestsPercentage > 0)
+                && (failedRequestsPercentage + delayedRequestsPercentage <= 100)
+                && !(delayedRequestsPercentage > 0 && requestLatency < 1);
+    }
+
+    @Override
+    public String toString() {
+        return "{ failedRequestsPercentage: " + failedRequestsPercentage + ", delayedRequestsPercentage: "
+                + delayedRequestsPercentage + ", requestLatency: " + requestLatency + '}';
+    }
 }

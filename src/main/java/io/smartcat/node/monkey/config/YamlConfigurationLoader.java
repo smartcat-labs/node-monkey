@@ -56,11 +56,13 @@ public final class YamlConfigurationLoader implements ConfigurationLoader {
         return url;
     }
 
-    @Override public Configuration load() throws ConfigurationException {
+    @Override
+    public Configuration load() throws ConfigurationException {
         return load(configURL());
     }
 
-    @Override public Configuration load(URL url) throws ConfigurationException {
+    @Override
+    public Configuration load(URL url) throws ConfigurationException {
         try {
             LOGGER.info("Loading settings from {}", url);
 
@@ -77,6 +79,11 @@ public final class YamlConfigurationLoader implements ConfigurationLoader {
             if (result == null) {
                 throw new ConfigurationException("Invalid yaml");
             }
+
+            if (!result.isValid()) {
+                return Configuration.loadDefaults();
+            }
+
             return result;
         } catch (YAMLException e) {
             throw new ConfigurationException("Invalid yaml", e);
