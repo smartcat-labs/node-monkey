@@ -1,0 +1,3 @@
+failedRequestPercentage: 10
+delayedRequestPercentage: 20
+requestLatency: 30

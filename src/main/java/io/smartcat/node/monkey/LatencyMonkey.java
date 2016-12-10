@@ -17,15 +17,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * LatencyMonkey adds "chaos" to the configurable amount of queries either by
- * adding latencies, or failing requests completely.
+ * LatencyMonkey adds latency to the queries, or fails them completely. The
+ * amount of affected queries is set through external configuration.
  */
 public final class LatencyMonkey implements QueryHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(LatencyMonkey.class);
@@ -40,31 +39,42 @@ public final class LatencyMonkey implements QueryHandler {
      * Default constructor.
      */
     public LatencyMonkey() {
-        loadConfiguration();
-
         actions = new Action[TOTAL_ACTIONS];
         nextAction = new AtomicInteger();
 
+        loadConfiguration();
         distributeActions();
         shuffleActions();
 
-        LOGGER.trace("Started node monkey...");
+        LOGGER.info("Started node monkey with configuration {}", config);
     }
 
     private void loadConfiguration() {
         ConfigurationLoader loader = new YamlConfigurationLoader();
+
         try {
             config = loader.load();
         } catch (ConfigurationException e) {
-            LOGGER.error("A problem occurred while loading configuration.", e);
-            throw new IllegalStateException(e);
+            LOGGER.warn("A problem occurred while loading configuration.", e);
+            config = Configuration.loadDefaults();
         }
     }
 
     private void distributeActions() {
-        Arrays.fill(actions, 0, config.delayedRequestsPercentage, Action.DELAY);
-        Arrays.fill(actions, config.delayedRequestsPercentage, config.failedRequestsPercentage, Action.ABORT);
-        Arrays.fill(actions, config.failedRequestsPercentage, actions.length, Action.EXECUTE);
+        int index = 0;
+
+        while (index < config.delayedRequestsPercentage) {
+            actions[index++] = Action.DELAY;
+        }
+
+        int chaosPercentage = config.delayedRequestsPercentage + config.failedRequestsPercentage;
+        while (index < chaosPercentage) {
+            actions[index++] = Action.ABORT;
+        }
+
+        while (index < actions.length) {
+            actions[index++] = Action.EXECUTE;
+        }
     }
 
     /*
@@ -84,8 +94,7 @@ public final class LatencyMonkey implements QueryHandler {
 
     @Override
     public ResultMessage process(String s, QueryState queryState, QueryOptions queryOptions,
-                                 Map<String, ByteBuffer> map)
-            throws RequestExecutionException, RequestValidationException {
+            Map<String, ByteBuffer> map) throws RequestExecutionException, RequestValidationException {
         LOGGER.trace("Intercepted process");
         applyNext();
         return queryHandler.process(s, queryState, queryOptions, map);
@@ -112,8 +121,8 @@ public final class LatencyMonkey implements QueryHandler {
     }
 
     @Override
-    public ResultMessage processPrepared(CQLStatement cqlStatement, QueryState queryState, QueryOptions queryOptions,
-                                         Map<String, ByteBuffer> map)
+    public ResultMessage processPrepared(CQLStatement cqlStatement, QueryState queryState,
+            QueryOptions queryOptions, Map<String, ByteBuffer> map)
             throws RequestExecutionException, RequestValidationException {
         LOGGER.trace("Intercepted processPrepared");
         applyNext();
@@ -122,7 +131,7 @@ public final class LatencyMonkey implements QueryHandler {
 
     @Override
     public ResultMessage processBatch(BatchStatement batchStatement, QueryState queryState,
-                                      BatchQueryOptions batchQueryOptions, Map<String, ByteBuffer> map)
+            BatchQueryOptions batchQueryOptions, Map<String, ByteBuffer> map)
             throws RequestExecutionException, RequestValidationException {
         LOGGER.trace("Intercepted processBatch");
         applyNext();

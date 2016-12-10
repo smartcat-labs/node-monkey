@@ -79,6 +79,11 @@ public final class YamlConfigurationLoader implements ConfigurationLoader {
             if (result == null) {
                 throw new ConfigurationException("Invalid yaml");
             }
+
+            if (!result.isValid()) {
+                return Configuration.loadDefaults();
+            }
+
             return result;
         } catch (YAMLException e) {
             throw new ConfigurationException("Invalid yaml", e);
