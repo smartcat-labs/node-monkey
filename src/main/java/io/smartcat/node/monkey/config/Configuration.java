@@ -38,7 +38,7 @@ public class Configuration {
      * @return true if configuration is valid, false otherwise
      */
     boolean isValid() {
-        return (failedRequestsPercentage > 0 && delayedRequestsPercentage > 0)
+        return (failedRequestsPercentage >= 0 && delayedRequestsPercentage >= 0)
                 && (failedRequestsPercentage + delayedRequestsPercentage <= 100)
                 && !(delayedRequestsPercentage > 0 && requestLatency < 1);
     }
